@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="พยากรณ์อากาศและดัชนีการตากผ้าภาษาไทย Grande Pleno สุขสวัสดิ์ - พระราม 3 กรุงเทพฯ พร้อมประเมินโอกาสฝนตกและเวลาผ้าแห้ง">
-  <title>พยากรณ์อากาศ & ดัชนีตากผ้า | Grande Pleno สุขสวัสดิ์-พระราม 3</title>
+  <meta name="description" content="ผู้ช่วยเช็กสภาพอากาศและคำแนะนำตากผ้าง่ายๆ สำหรับ Grande Pleno สุขสวัสดิ์ - พระราม 3">
+  <title>🧺 วันนี้ตากผ้าได้ไหม? | Grande Pleno สุขสวัสดิ์-พระราม 3</title>
   
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/weather-anim.css">
@@ -12,328 +12,133 @@
 </head>
 <body class="theme-sunny">
 
-  <!-- Dynamic Background Animation Canvas & Ambience -->
+  <!-- Dynamic Ambient Background Animation -->
   <div class="weather-canvas-container" aria-hidden="true">
     <div class="sun-orb" id="sun-orb-glow"></div>
     <div class="cloud-layer cloud-layer-1"></div>
     <div class="cloud-layer cloud-layer-2"></div>
     <canvas id="weather-bg-canvas"></canvas>
-    <div class="lightning-flash" id="lightning-overlay"></div>
   </div>
 
   <div class="app-container">
     
-    <!-- Top Header -->
-    <header class="app-header">
-      <div class="header-top-row">
-        <div class="app-branding">
-          <span class="app-logo" role="img" aria-label="Laundry and Sun Icon">🧺</span>
-          <div class="app-title-group">
-            <h1>พยากรณ์อากาศ & ตากผ้า</h1>
-            <p class="app-subtitle" id="current-thai-time">อัปเดตล่าสุด...</p>
-          </div>
-        </div>
-
-        <div class="header-actions">
-          <span class="app-version-badge" title="เวอร์ชันปัจจุบัน">v1.2.0</span>
-          <button id="btn-radar" class="btn" title="ดูเรดาร์ตรวจฝน กทม." aria-label="เรดาร์ฝน">
-            <span>📡 เรดาร์ฝน</span>
-          </button>
-          <button id="btn-refresh" class="btn btn-icon" title="รีเฟรชข้อมูลสภาพอากาศ" aria-label="รีเฟรช">
-            🔄
-          </button>
-          <button id="btn-gps" class="btn" title="ใช้ตำแหน่ง GPS ปัจจุบัน" aria-label="ใช้พิกัดปัจจุบัน">
-            <span>📍 พิกัดฉัน</span>
-          </button>
+    <!-- Clean Top Header -->
+    <header class="clean-header">
+      <div class="header-branding">
+        <span class="cute-logo">🧺</span>
+        <div>
+          <h1 class="header-title">วันนี้ตากผ้าได้ไหม?</h1>
+          <p class="header-location">🏡 Grande Pleno สุขสวัสดิ์ - พระราม 3</p>
         </div>
       </div>
 
-      <!-- Location Card & Search -->
-      <section class="location-card" aria-label="การเลือกตำแหน่งที่ตั้ง">
-        <div class="location-main">
-          <div class="location-info-wrapper">
-            <div class="location-icon-badge" aria-hidden="true">🏡</div>
-            <div class="location-texts">
-              <div class="location-name-badge">
-                <span class="location-name" id="current-location-name">Grande Pleno สุขสวัสดิ์ - พระราม 3</span>
-                <span class="default-tag" id="default-location-tag">ตำแหน่งหลัก</span>
-              </div>
-              <span class="location-subtext" id="current-location-subtext">ทุ่งครุ / บางมด, กรุงเทพมหานคร</span>
-            </div>
-          </div>
-
-          <div class="search-box-container">
-            <div class="search-input-wrapper">
-              <input type="text" id="location-search-input" class="search-input" placeholder="ค้นหาเขต, อำเภอ, จังหวัด..." autocomplete="off">
-              <button class="search-icon-btn" id="btn-search-trigger" aria-label="ค้นหา">🔍</button>
-            </div>
-            <div class="search-dropdown" id="search-dropdown-list">
-              <!-- Search Results inserted by JS -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Location Presets -->
-        <div class="location-presets" id="preset-buttons-container" aria-label="ตำแหน่งด่วน">
-          <!-- Preset buttons rendered via JS -->
-        </div>
-      </section>
+      <div class="header-right-actions">
+        <span class="app-version-badge" title="เวอร์ชันแอปพลิเคชัน">v2.0.0</span>
+        <button id="btn-refresh" class="btn-clean-icon" title="กดเพื่ออัปเดตข้อมูลล่าสุด" aria-label="รีเฟรช">
+          🔄
+        </button>
+      </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main>
+    <main class="main-content">
       
-      <!-- 🌟 FEATURED LAUNDRY ADVISOR HERO CARD -->
-      <section class="laundry-hero-card" id="laundry-advisor-section" aria-label="คำแนะนำการตากผ้า">
-        <div class="laundry-header">
-          <div class="laundry-title-group">
-            <div class="laundry-icon-badge" id="laundry-hero-icon">☀️🧺</div>
-            <div class="laundry-heading-text">
-              <h2>
-                ดัชนีความเหมาะสมในการตากผ้า
-                <span style="font-size: 0.9rem; font-weight: normal; color: var(--accent-gold);">★ แนะนำ</span>
-              </h2>
-              <p class="laundry-subtitle">วิเคราะห์โอกาสฝน แดด ลม และความชื้นแบบเรียลไทม์</p>
-            </div>
-          </div>
-
-          <div id="laundry-status-badge" class="status-badge status-excellent">
-            กำลังวิเคราะห์ข้อมูล...
-          </div>
-        </div>
-
-        <!-- Laundry Dial & Main Advice -->
-        <div class="laundry-content-grid">
-          <!-- Circular Score Dial -->
-          <div class="score-dial-container">
-            <svg class="score-dial-svg" viewBox="0 0 160 160">
-              <circle class="score-circle-bg" cx="80" cy="80" r="70" />
-              <circle id="score-dial-bar" class="score-circle-bar" cx="80" cy="80" r="70" stroke="#10b981" />
-            </svg>
-            <div class="score-dial-content">
-              <span class="score-number" id="laundry-score-num">--</span>
-              <span class="score-unit">คะแนนความน่าตาก</span>
-            </div>
-          </div>
-
-          <!-- Advice description -->
-          <div class="laundry-advice-box">
-            <h3 class="laundry-main-title" id="laundry-main-title">กำลังประเมินสภาพอากาศ...</h3>
-            <p class="laundry-description" id="laundry-description">ระบบกำลังรวบรวมข้อมูลโอกาสฝนตกและแสงแดดเพื่อคำนวณช่วงเวลาการตากผ้าที่ดีที่สุด</p>
-            
-            <div class="factor-tags-container" id="laundry-factors-tags">
-              <!-- Dynamically populated with badges -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Fabric Type Selector & Estimated Drying Time -->
-        <div class="fabric-selector-bar">
-          <div class="fabric-header">
-            <span class="fabric-label">👕 เลือกประเภทผ้าเพื่อคำนวณเวลาแห้ง:</span>
-            <span class="drying-time-badge" id="estimated-drying-badge">⏱️ คาดว่าแห้งใน: คำนวณ...</span>
-          </div>
-          <div class="fabric-buttons-group" id="fabric-buttons-group">
-            <button class="fabric-btn" data-fabric="thin">ผ้าบาง / เสื้อยืด</button>
-            <button class="fabric-btn active" data-fabric="normal">ผ้าทั่วไป / ชุดทำงาน</button>
-            <button class="fabric-btn" data-fabric="heavy">ผ้าหนา / ผ้ายีนส์</button>
-            <button class="fabric-btn" data-fabric="bedding">ผ้าปูที่นอน / ผ้านวม</button>
-          </div>
-        </div>
-
-        <!-- 12-Hour Laundry Timeline Strip -->
-        <div class="laundry-timeline-container">
-          <div class="timeline-title-row">
-            <span>🕒 ความปลอดภัยในการตากผ้ารายชั่วโมง (เริ่มจากชั่วโมงนี้):</span>
-            <span id="best-window-text" style="color: var(--accent-gold); font-weight: 500;">ช่วงเวลาทอง: 09:00 - 14:00 น.</span>
-          </div>
-          <div class="timeline-items-wrapper" id="laundry-timeline-strip">
-            <!-- Timeline items rendered by JS -->
-          </div>
-        </div>
-      </section>
-
-      <!-- MAIN WEATHER OVERVIEW & METRICS -->
-      <section class="main-dashboard-grid" aria-label="สภาพอากาศปัจจุบัน">
+      <!-- 🌟 HERO DECISION CARD (คำตอบหลักที่ต้องรู้ทันที) -->
+      <section class="hero-decision-card" id="hero-decision-card">
         
-        <!-- Big Current Weather Card -->
-        <div class="weather-hero-card">
-          <div class="hero-top">
-            <span class="time-tag" id="current-hour-tag">สภาพอากาศขณะนี้</span>
-            <span class="weather-condition-tag" id="weather-wmo-title">ท้องฟ้าแจ่มใส</span>
-          </div>
+        <div class="hero-top-badge-row">
+          <span class="date-badge" id="current-thai-time">กำลังโหลด...</span>
+          <span class="decision-pill" id="decision-pill">กำลังตรวจสอบ...</span>
+        </div>
 
-          <div class="hero-temp-row">
-            <div class="hero-temp-group">
-              <span class="hero-temperature" id="current-temp">--</span>
-              <span class="hero-temp-unit">°C</span>
-            </div>
-            <div class="hero-weather-icon-large" id="current-weather-icon">☀️</div>
-          </div>
-
-          <div class="hero-summary-desc" id="weather-detailed-desc">
-            แดดจัด ท้องฟ้าโปร่ง อากาศดี
-          </div>
-
-          <div class="hero-temp-range-pills">
-            <span class="temp-pill" id="real-feel-pill">🌡️ รู้สึกเหมือน: --°C</span>
-            <span class="temp-pill" id="temp-max-min-pill">🔺 สูงสุด: --° | 🔻 ต่ำสุด: --°</span>
-            <span class="temp-pill" id="cloud-cover-pill">☁️ เมฆปกคลุม: --%</span>
+        <div class="hero-decision-main">
+          <div class="hero-icon-large" id="hero-status-icon">☀️🧺</div>
+          <div class="hero-decision-text">
+            <h2 class="hero-main-title" id="hero-main-title">กำลังวิเคราะห์สภาพอากาศ...</h2>
+            <p class="hero-advice-desc" id="hero-advice-desc">กำลังดูข้อมูลแดด ลม และโอกาสฝนตกให้อยู่นะคะ</p>
           </div>
         </div>
 
-        <!-- 6 Metrics Grid Cards -->
-        <div class="metrics-grid-card">
-          
-          <!-- Rain Chance -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-title">โอกาสเกิดฝน (ช่วงนี้)</span>
-              <span class="metric-icon">🌧️</span>
-            </div>
-            <div class="metric-value-row">
-              <span class="metric-value" id="metric-rain-pop">--</span>
-              <span class="metric-unit">%</span>
-            </div>
-            <span class="metric-subtext" id="metric-rain-sum">ปริมาณฝนสะสม: 0.0 มม.</span>
+        <!-- Estimated Drying Time & Clothes Type Selector -->
+        <div class="drying-calc-box">
+          <div class="drying-time-row">
+            <span class="drying-label">⏱️ คาดว่าจะแห้งในอีกประมาณ:</span>
+            <span class="drying-highlight" id="estimated-drying-badge">-- ชม.</span>
           </div>
 
-          <!-- Humidity -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-title">ความชื้นสัมพัทธ์</span>
-              <span class="metric-icon">💧</span>
-            </div>
-            <div class="metric-value-row">
-              <span class="metric-value" id="metric-humidity">--</span>
-              <span class="metric-unit">%</span>
-            </div>
-            <span class="metric-subtext" id="metric-humidity-desc">ความชื้นปกติ</span>
+          <div class="clothes-selector" id="fabric-buttons-group">
+            <button class="cloth-pill active" data-fabric="normal">👕 เสื้อผ้าทั่วไป</button>
+            <button class="cloth-pill" data-fabric="heavy">👖 กางเกงยีนส์ / ผ้าหนา</button>
+            <button class="cloth-pill" data-fabric="bedding">🛏️ ผ้านวม / ผ้าปูที่นอน</button>
           </div>
+        </div>
 
-          <!-- UV Index -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-title">ดัชนีรังสี UV</span>
-              <span class="metric-icon">☀️</span>
-            </div>
-            <div class="metric-value-row">
-              <span class="metric-value" id="metric-uv">--</span>
-              <span class="metric-unit">UVI</span>
-            </div>
-            <span class="metric-subtext" id="metric-uv-desc">แดดจัดมาก ฆ่าเชื้อดี</span>
+      </section>
+
+      <!-- 📋 3 ESSENTIAL TAKEAWAY CARDS (สรุป 3 ข้อสั้นๆ) -->
+      <section class="takeaway-grid">
+        
+        <!-- Rain Card -->
+        <div class="takeaway-card">
+          <div class="takeaway-icon">🌧️</div>
+          <div class="takeaway-info">
+            <span class="takeaway-label">โอกาสฝนวันนี้</span>
+            <span class="takeaway-value" id="summary-rain-text">กำลังตรวจสอบ...</span>
           </div>
+        </div>
 
-          <!-- Wind -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-title">แรงลม</span>
-              <span class="metric-icon">💨</span>
-            </div>
-            <div class="metric-value-row">
-              <span class="metric-value" id="metric-wind">--</span>
-              <span class="metric-unit">กม./ชม.</span>
-            </div>
-            <span class="metric-subtext" id="metric-wind-dir">ทิศทาง: ทิศใต้</span>
+        <!-- Sun & Wind Card -->
+        <div class="takeaway-card">
+          <div class="takeaway-icon">☀️</div>
+          <div class="takeaway-info">
+            <span class="takeaway-label">แดดและลม</span>
+            <span class="takeaway-value" id="summary-sun-wind">กำลังตรวจสอบ...</span>
           </div>
+        </div>
 
-          <!-- Air Quality PM2.5 -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-title">ฝุ่น PM2.5</span>
-              <span class="metric-icon">🍃</span>
-            </div>
-            <div class="metric-value-row">
-              <span class="metric-value" id="metric-pm25">--</span>
-              <span class="metric-unit">µg/m³</span>
-            </div>
-            <span class="metric-subtext" id="metric-pm25-status">อากาศสะอาด ปลอดภัย</span>
+        <!-- Best Window Card -->
+        <div class="takeaway-card">
+          <div class="takeaway-icon">⏰</div>
+          <div class="takeaway-info">
+            <span class="takeaway-label">ช่วงเวลาตากที่ดีที่สุด</span>
+            <span class="takeaway-value" id="summary-best-window">--:-- - --:-- น.</span>
           </div>
+        </div>
 
-          <!-- Sunrise / Sunset -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-title">พระอาทิตย์</span>
-              <span class="metric-icon">🌅</span>
-            </div>
-            <div class="metric-value-row">
-              <span class="metric-value" style="font-size: 1.1rem;" id="metric-sun-times">-- : --</span>
-            </div>
-            <span class="metric-subtext" id="metric-sun-sub">ขึ้น / ตก</span>
-          </div>
+      </section>
 
+      <!-- 🕒 HOURLY CLOTHES SAFETY (ไทม์ไลน์รายชั่วโมง) -->
+      <section class="simple-section">
+        <div class="section-title-row">
+          <h3 class="simple-section-title">🕒 สภาพอากาศรายชั่วโมง (เริ่มจากตอนนี้)</h3>
+        </div>
+        <div class="simple-hourly-strip" id="hourly-forecast-container">
+          <!-- Rendered via JS -->
         </div>
       </section>
 
-      <!-- HOURLY FORECAST (24 HOURS FROM NOW) -->
-      <section class="section-card" aria-label="พยากรณ์รายชั่วโมง">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span>⏱️ พยากรณ์รายชั่วโมง & โอกาสฝนตก (เริ่มจากขณะนี้)</span>
-          </h2>
-          <span style="font-size: 0.8rem; color: var(--text-muted);">เลื่อนดูได้ 24 ชม. ข้างหน้า</span>
+      <!-- 📅 7-DAY WEEKLY WASHING PLAN (วางแผนซักผ้าสัปดาห์นี้) -->
+      <section class="simple-section">
+        <div class="section-title-row">
+          <h3 class="simple-section-title">📅 วางแผนซักผ้า 7 วันข้างหน้า</h3>
         </div>
-        <div class="hourly-scroll-container" id="hourly-forecast-container">
-          <!-- Hourly cards rendered via JS -->
-        </div>
-      </section>
-
-      <!-- 7-DAY FORECAST -->
-      <section class="section-card" aria-label="พยากรณ์ล่วงหน้า 7 วัน">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span>📅 พยากรณ์อากาศ & ดัชนีตากผ้า 7 วันล่วงหน้า</span>
-          </h2>
-        </div>
-        <div class="daily-forecast-list" id="daily-forecast-container">
-          <!-- Daily rows rendered via JS -->
+        <div class="weekly-plan-list" id="daily-forecast-container">
+          <!-- Rendered via JS -->
         </div>
       </section>
 
     </main>
 
-    <!-- Radar Modal -->
-    <div class="modal-backdrop" id="radar-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>📡 เรดาร์ตรวจจับกลุ่มฝน กทม. & ปริมณฑล</h3>
-          <button class="modal-close-btn" id="btn-close-radar">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">
-            💡 <strong>ทำไมหน้าบ้านฝนยังไม่ตก แต่พยากรณ์แจ้งเตือน?</strong><br>
-            แบบจำลองพยากรณ์อากาศตรวจพบกลุ่มเมฆฝนที่มีความหนาแน่นสูง (Cloud Cover) ในรัศมีเขตทุ่งครุ-สุขสวัสดิ์-พระราม 3 หรือมีกลุ่มฝนกำลังเคลื่อนตัวเข้ามาใน 1–3 ชม. ข้างหน้า คุณสามารถตรวจดูภาพเรดาร์สดได้จากลิงก์ด้านล่างนี้:
-          </p>
-          <div class="radar-links-grid">
-            <a href="https://weather.bangkok.go.th/radar" target="_blank" rel="noopener" class="radar-btn-link">
-              <span>🌦️ เรดาร์สถานีกรุงเทพมหานคร (กทม.)</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">ตรวจสอบกลุ่มฝนแบบสดในเขตราษฎร์บูรณะ ทุ่งครุ ยานนาวา</span>
-            </a>
-            <a href="https://weather.tmd.go.th/bma.php" target="_blank" rel="noopener" class="radar-btn-link">
-              <span>🛰️ เรดาร์กรมอุตุนิยมวิทยา (TMD)</span>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">ดูภาพถ่ายดาวเทียมและทิศทางลมมรสุม</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="app-footer">
-      <p>🏡 ออกแบบเฉพาะสำหรับชุมชน <strong>Grande Pleno สุขสวัสดิ์ - พระราม 3</strong> และพื้นที่กรุงเทพฯ-ปริมณฑล</p>
-      <div class="footer-links">
-        <span>ข้อมูลสภาพอากาศจาก <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></span>
-        <span>•</span>
-        <span>อัปเดตแบบเรียลไทม์</span>
-      </div>
+    <!-- Simple Cozy Footer -->
+    <footer class="cozy-footer">
+      <p>❤️ ออกแบบมาเพื่อบ้าน <strong>Grande Pleno สุขสวัสดิ์ - พระราม 3</strong> โดยเฉพาะ</p>
     </footer>
 
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- Application Modules -->
+  <!-- Script Modules -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
