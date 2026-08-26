@@ -185,47 +185,37 @@ export function getWeatherInfo(code, isDay = 1) {
   };
 }
 
-export function getWindDirectionThai(degree) {
-  const directions = [
-    'เหนือ (N)', 'ตะวันออกเฉียงเหนือ (NE)', 'ตะวันออก (E)',
-    'ตะวันออกเฉียงใต้ (SE)', 'ใต้ (S)', 'ตะวันตกเฉียงใต้ (SW)',
-    'ตะวันตก (W)', 'ตะวันตกเฉียงเหนือ (NW)'
-  ];
-  const index = Math.round(((degree %= 360) < 0 ? degree + 360 : degree) / 45) % 8;
-  return directions[index];
-}
-
 export function formatThaiTime(isoString, includeDate = false) {
   if (!isoString) return '';
-  const date = new Date(isoString);
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  
+  const timePart = isoString.slice(11, 16);
   if (!includeDate) {
-    return `${hours}:${minutes} น.`;
+    return `${timePart} น.`;
   }
-
+  const parts = isoString.slice(0, 10).split('-');
+  const day = parseInt(parts[2], 10);
+  const month = parseInt(parts[1], 10);
   const thaiMonths = [
     'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
   ];
-  const day = date.getDate();
-  const month = thaiMonths[date.getMonth()];
-  return `${day} ${month} ${hours}:${minutes} น.`;
+  return `${day} ${thaiMonths[month - 1]} ${timePart} น.`;
 }
 
 export function formatThaiDateShort(isoDateString) {
-  if (!isoDateString) return '';
-  const date = new Date(isoDateString);
+  if (!isoDateString) return { dayName: '', dayNumber: '', monthName: '', formatted: '' };
+  
+  const [year, month, day] = isoDateString.slice(0, 10).split('-').map(Number);
+  const dateObj = new Date(year, month - 1, day);
   const thaiDays = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
   const thaiMonths = [
     'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'
   ];
+
   return {
-    dayName: thaiDays[date.getDay()],
-    dayNumber: date.getDate(),
-    monthName: thaiMonths[date.getMonth()],
-    formatted: `${thaiDays[date.getDay()]} ${date.getDate()} ${thaiMonths[date.getMonth()]}`
+    dayName: thaiDays[dateObj.getDay()],
+    dayNumber: day,
+    monthName: thaiMonths[month - 1],
+    formatted: `${thaiDays[dateObj.getDay()]} ${day} ${thaiMonths[month - 1]}`
   };
 }

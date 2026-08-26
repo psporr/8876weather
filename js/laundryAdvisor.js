@@ -18,7 +18,7 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
   const hourly = weatherData.hourly;
   const currentHourIndex = findCurrentHourIndex(hourly.time, current.time);
   
-  // Extract next 6-8 hours forecast window starting from CURRENT hour
+  // Extract next 6 hours forecast window starting from CURRENT hour
   const windowHours = 6;
   const forecastWindow = [];
   
@@ -45,10 +45,10 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
   const isHeavyRainNow = currentPrecip >= 1.0 || [63, 65, 81, 82, 95, 96, 99].includes(current.weather_code);
   const isNight = current.is_day === 0;
 
-  // Find rainy hours text
+  // Find rainy hours text using direct string slice (e.g. "17:00")
   const rainyHours = forecastWindow
     .filter(h => h.pop >= 45)
-    .map(h => `${new Date(h.time).getHours()}:00`);
+    .map(h => `${h.time.slice(11, 13)}:00`);
 
   let rainTimeNotice = '';
   if (rainyHours.length > 0) {
@@ -123,7 +123,7 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
     : (rainTimeNotice ? `เสี่ยงฝน ${maxPop}% (${rainTimeNotice})` : `โอกาสฝน ${maxPop}%`);
   const bestWindow = findBestDryingWindow(hourly, currentHourIndex);
 
-  // Simplified Hourly Timeline (Next 10-12 hours)
+  // Simplified Hourly Timeline (Next 10-12 hours from current hour)
   const hourlySafety = generateSimplifiedHourly(hourly, currentHourIndex, 10);
 
   return {
@@ -142,20 +142,33 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
   };
 }
 
-function findCurrentHourIndex(times, currentIsoTime = null) {
+export function findCurrentHourIndex(times, currentIsoTime = null) {
   if (!times || !times.length) return 0;
+  
+  // 1. Match by prefix of current API time (e.g. "2026-08-26T16")
   if (currentIsoTime) {
-    const idx = times.indexOf(currentIsoTime);
+    const currentPrefix = currentIsoTime.slice(0, 13);
+    const idx = times.findIndex(t => t.startsWith(currentPrefix));
     if (idx !== -1) return idx;
   }
 
+  // 2. Match by current Asia/Bangkok local time
   const now = new Date();
-  const currentIsoHour = now.toISOString().slice(0, 13);
-  for (let i = 0; i < times.length; i++) {
-    if (times[i].startsWith(currentIsoHour)) {
-      return i;
-    }
-  }
+  const thaiFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    hour12: false
+  });
+  const parts = thaiFormatter.formatToParts(now);
+  const getPart = (type) => parts.find(p => p.type === type)?.value;
+  const localPrefix = `${getPart('year')}-${getPart('month')}-${getPart('day')}T${getPart('hour')}`;
+  
+  const idx = times.findIndex(t => t.startsWith(localPrefix));
+  if (idx !== -1) return idx;
+
   return 0;
 }
 
@@ -221,8 +234,7 @@ function findBestDryingWindow(hourly, startIndex) {
     const idx = startIndex + i;
     const uv = hourly.uv_index ? hourly.uv_index[idx] : 0;
     const pop = hourly.precipitation_probability ? hourly.precipitation_probability[idx] : 0;
-    const hourTime = new Date(hourly.time[idx]);
-    const hourNum = hourTime.getHours();
+    const hourNum = parseInt(hourly.time[idx].slice(11, 13), 10);
 
     if (hourNum >= 8 && hourNum <= 16) {
       if (pop <= 30 && uv >= 3) {
@@ -245,8 +257,7 @@ function generateSimplifiedHourly(hourly, startIndex, count = 10) {
   for (let i = 0; i < len; i++) {
     const idx = startIndex + i;
     const timeStr = hourly.time[idx];
-    const date = new Date(timeStr);
-    const hourText = i === 0 ? 'ตอนนี้' : `${String(date.getHours()).padStart(2, '0')}:00`;
+    const hourText = i === 0 ? 'ตอนนี้' : timeStr.slice(11, 16);
     const pop = hourly.precipitation_probability ? hourly.precipitation_probability[idx] : 0;
     const isDay = hourly.is_day ? hourly.is_day[idx] : 1;
     const code = hourly.weather_code ? hourly.weather_code[idx] : 0;

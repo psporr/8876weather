@@ -1,5 +1,5 @@
 /**
- * Simplified & Friendly Laundry Advisor App Controller (v2.0.0)
+ * Simplified & Friendly Laundry Advisor App Controller (v2.1.0)
  */
 
 import { 
@@ -96,7 +96,11 @@ class WeatherApp {
       const dayName = thaiDays[now.getDay()];
       const day = now.getDate();
       const month = thaiMonths[now.getMonth()];
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} น.`;
+      
+      // Exact Thai 2-digit local time
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hours}:${minutes} น.`;
 
       this.el.thaiTime.textContent = `${dayName}ที่ ${day} ${month} • ${timeStr}`;
     };
@@ -182,7 +186,7 @@ class WeatherApp {
       card.innerHTML = `
         <span class="hourly-time-text">${item.hourText}</span>
         <span class="hourly-icon-emoji">${item.icon}</span>
-        <span class="hourly-rain-tag ${popClass}">${item.pop}%</span>
+        <span class="hourly-rain-tag ${popClass}">🌧️ ${item.pop}%</span>
         <span class="hourly-status-tag">${item.statusText}</span>
       `;
       this.el.hourlyForecastContainer.appendChild(card);
