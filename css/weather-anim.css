@@ -1,0 +1,154 @@
+/* Weather Animation System & Ambient Dynamic Backgrounds */
+
+.weather-canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+#weather-bg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ambient dynamic background themes */
+body {
+  transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* 1. Clear Sunny Day (ฟ้าโปร่ง แดดจัด) */
+body.theme-sunny {
+  background: linear-gradient(145deg, #1e70bf 0%, #3ea6ff 40%, #fbd07c 100%);
+}
+
+/* 2. Mainly Clear / Warm Day (แดดอ่อน มีเมฆนิดหน่อย) */
+body.theme-mainly-clear {
+  background: linear-gradient(145deg, #1b68a8 0%, #4696df 50%, #9dd4fc 100%);
+}
+
+/* 3. Partly Cloudy (มีเมฆบางส่วน) */
+body.theme-partly-cloudy {
+  background: linear-gradient(145deg, #2b5876 0%, #4e4376 60%, #8993a4 100%);
+}
+
+/* 4. Overcast / Gloomy (เมฆครึ้ม มืดฟ้ามัวดิน) */
+body.theme-overcast {
+  background: linear-gradient(145deg, #2c3e50 0%, #4a5c6d 50%, #687987 100%);
+}
+
+/* 5. Rain / Drizzle (ฝนตก ละอองฝน) */
+body.theme-rain {
+  background: linear-gradient(145deg, #18283b 0%, #294861 45%, #3b5f7d 100%);
+}
+
+/* 6. Thunderstorm (พายุฝนฟ้าคะนอง) */
+body.theme-thunderstorm {
+  background: linear-gradient(145deg, #0f1423 0%, #1e1b38 45%, #2a2046 100%);
+}
+
+/* 7. Fog / Mist (หมอกหนา) */
+body.theme-fog {
+  background: linear-gradient(145deg, #3f4c6b 0%, #606c88 70%, #8290a8 100%);
+}
+
+/* 8. Clear Night (กลางคืน ฟ้าโปร่ง) */
+body.theme-night {
+  background: linear-gradient(145deg, #0a0f1d 0%, #141f36 50%, #1a2a4c 100%);
+}
+
+/* 9. Rainy Night (กลางคืน ฝนตก) */
+body.theme-night-rain {
+  background: linear-gradient(145deg, #080c14 0%, #121c27 50%, #1c2b3a 100%);
+}
+
+/* Glowing Sun Orb Effect */
+.sun-orb {
+  position: absolute;
+  top: -80px;
+  right: -50px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 222, 120, 0.45) 0%, rgba(255, 175, 55, 0.15) 50%, transparent 70%);
+  filter: blur(40px);
+  animation: pulseSun 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes pulseSun {
+  0% { transform: scale(1) translateY(0); opacity: 0.7; }
+  100% { transform: scale(1.15) translateY(15px); opacity: 1; }
+}
+
+/* Subtle Clouds Floating Effect */
+.cloud-layer {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+.cloud-layer-1 {
+  top: 5%;
+  animation: floatClouds 90s linear infinite;
+}
+
+.cloud-layer-2 {
+  top: 15%;
+  animation: floatClouds 140s linear infinite reverse;
+  opacity: 0.08;
+}
+
+@keyframes floatClouds {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Lightning Flash Animation for Thunderstorms */
+.lightning-flash {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+.flash-active {
+  animation: lightning 1.8s ease-out;
+}
+
+@keyframes lightning {
+  0% { opacity: 0; }
+  5% { opacity: 0.9; }
+  10% { opacity: 0.1; }
+  15% { opacity: 0.8; }
+  25% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Raindrop ripple effect */
+.rain-ripple {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: ripple 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  0% { width: 0; height: 0; opacity: 1; transform: translate(-50%, -50%); }
+  100% { width: 60px; height: 30px; opacity: 0; transform: translate(-50%, -50%); }
+}
