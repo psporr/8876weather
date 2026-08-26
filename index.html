@@ -35,6 +35,9 @@
         </div>
 
         <div class="header-actions">
+          <button id="btn-radar" class="btn" title="ดูเรดาร์ตรวจฝน กทม." aria-label="เรดาร์ฝน">
+            <span>📡 เรดาร์ฝน</span>
+          </button>
           <button id="btn-refresh" class="btn btn-icon" title="รีเฟรชข้อมูลสภาพอากาศ" aria-label="รีเฟรช">
             🔄
           </button>
@@ -140,7 +143,7 @@
         <!-- 12-Hour Laundry Timeline Strip -->
         <div class="laundry-timeline-container">
           <div class="timeline-title-row">
-            <span>🕒 ความปลอดภัยในการตากผ้ารายชั่วโมง (12 ชม. ข้างหน้า):</span>
+            <span>🕒 ความปลอดภัยในการตากผ้ารายชั่วโมง (เริ่มจากชั่วโมงนี้):</span>
             <span id="best-window-text" style="color: var(--accent-gold); font-weight: 500;">ช่วงเวลาทอง: 09:00 - 14:00 น.</span>
           </div>
           <div class="timeline-items-wrapper" id="laundry-timeline-strip">
@@ -174,6 +177,7 @@
           <div class="hero-temp-range-pills">
             <span class="temp-pill" id="real-feel-pill">🌡️ รู้สึกเหมือน: --°C</span>
             <span class="temp-pill" id="temp-max-min-pill">🔺 สูงสุด: --° | 🔻 ต่ำสุด: --°</span>
+            <span class="temp-pill" id="cloud-cover-pill">☁️ เมฆปกคลุม: --%</span>
           </div>
         </div>
 
@@ -183,7 +187,7 @@
           <!-- Rain Chance -->
           <div class="metric-card">
             <div class="metric-header">
-              <span class="metric-title">โอกาสเกิดฝน</span>
+              <span class="metric-title">โอกาสเกิดฝน (ช่วงนี้)</span>
               <span class="metric-icon">🌧️</span>
             </div>
             <div class="metric-value-row">
@@ -260,13 +264,13 @@
         </div>
       </section>
 
-      <!-- HOURLY FORECAST (24-48 HOURS) -->
+      <!-- HOURLY FORECAST (24 HOURS FROM NOW) -->
       <section class="section-card" aria-label="พยากรณ์รายชั่วโมง">
         <div class="section-header">
           <h2 class="section-title">
-            <span>⏱️ พยากรณ์รายชั่วโมง & โอกาสฝนตก</span>
+            <span>⏱️ พยากรณ์รายชั่วโมง & โอกาสฝนตก (เริ่มจากขณะนี้)</span>
           </h2>
-          <span style="font-size: 0.8rem; color: var(--text-muted);">เลื่อนดูได้ 24 ชม.</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">เลื่อนดูได้ 24 ชม. ข้างหน้า</span>
         </div>
         <div class="hourly-scroll-container" id="hourly-forecast-container">
           <!-- Hourly cards rendered via JS -->
@@ -286,6 +290,32 @@
       </section>
 
     </main>
+
+    <!-- Radar Modal -->
+    <div class="modal-backdrop" id="radar-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>📡 เรดาร์ตรวจจับกลุ่มฝน กทม. & ปริมณฑล</h3>
+          <button class="modal-close-btn" id="btn-close-radar">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">
+            💡 <strong>ทำไมหน้าบ้านฝนยังไม่ตก แต่พยากรณ์แจ้งเตือน?</strong><br>
+            แบบจำลองพยากรณ์อากาศตรวจพบกลุ่มเมฆฝนที่มีความหนาแน่นสูง (Cloud Cover) ในรัศมีเขตทุ่งครุ-สุขสวัสดิ์-พระราม 3 หรือมีกลุ่มฝนกำลังเคลื่อนตัวเข้ามาใน 1–3 ชม. ข้างหน้า คุณสามารถตรวจดูภาพเรดาร์สดได้จากลิงก์ด้านล่างนี้:
+          </p>
+          <div class="radar-links-grid">
+            <a href="https://weather.bangkok.go.th/radar" target="_blank" rel="noopener" class="radar-btn-link">
+              <span>🌦️ เรดาร์สถานีกรุงเทพมหานคร (กทม.)</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">ตรวจสอบกลุ่มฝนแบบสดในเขตราษฎร์บูรณะ ทุ่งครุ ยานนาวา</span>
+            </a>
+            <a href="https://weather.tmd.go.th/bma.php" target="_blank" rel="noopener" class="radar-btn-link">
+              <span>🛰️ เรดาร์กรมอุตุนิยมวิทยา (TMD)</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">ดูภาพถ่ายดาวเทียมและทิศทางลมมรสุม</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="app-footer">

@@ -13,7 +13,7 @@ export const WMO_WEATHER_MAP = {
   },
   1: {
     label: 'ท้องฟ้าโปร่งเป็นส่วนใหญ่',
-    desc: 'แดดดี มีเมฆเล็กน้อย',
+    desc: 'แดดดี มีเมฆบางตา',
     icon: '🌤️',
     type: 'mainly-clear',
     nightIcon: '🌤️',
@@ -22,7 +22,7 @@ export const WMO_WEATHER_MAP = {
   },
   2: {
     label: 'มีเมฆบางส่วน',
-    desc: 'แดดสลับร่ม มีเมฆกระจาย',
+    desc: 'แดดสลับร่ม มีเมฆกระจายตัว',
     icon: '⛅',
     type: 'partly-cloudy',
     nightIcon: '☁️',
@@ -30,7 +30,7 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: 5
   },
   3: {
-    label: 'มีเมฆมาก / ท้องฟ้ามืดครึ้ม',
+    label: 'มีเมฆมาก / ท้องฟ้าครึ้ม',
     desc: 'เมฆปกคลุมหนาแน่น แสงแดดน้อย',
     icon: '☁️',
     type: 'overcast',
@@ -48,8 +48,8 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: -20
   },
   48: {
-    label: 'มีหมอกน้ำค้างแข็ง',
-    desc: 'อากาศเย็นจัด ความชื้นสูง',
+    label: 'มีหมอกน้ำค้าง',
+    desc: 'อากาศชื้น หมอกน้ำค้างลง',
     icon: '🌫️',
     type: 'fog',
     nightIcon: '🌫️',
@@ -57,17 +57,17 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: -20
   },
   51: {
-    label: 'ฝนปรอยๆ เบาบาง',
-    desc: 'มีละอองฝนเล็กน้อย',
+    label: 'เมฆครึ้ม / เสี่ยงละอองฝน',
+    desc: 'ท้องฟ้าครึ้มหนาแน่น มีโอกาสเกิดละอองฝนหรือฝนโปรย',
     icon: '🌦️',
     type: 'drizzle',
     nightIcon: '🌧️',
-    nightDesc: 'ละอองฝนยามค่ำคืน',
+    nightDesc: 'เมฆครึ้ม เสี่ยงละอองฝนยามค่ำ',
     laundryRatingBonus: -40
   },
   53: {
-    label: 'ฝนปรอยปานกลาง',
-    desc: 'ละอองฝนต่อเนื่อง',
+    label: 'มีละอองฝนโปรยปราย',
+    desc: 'มีละอองฝนหรือฝนเบาบางสม่ำเสมอ',
     icon: '🌧️',
     type: 'drizzle',
     nightIcon: '🌧️',
@@ -75,8 +75,8 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: -50
   },
   55: {
-    label: 'ฝนปรอยหนาเม็ด',
-    desc: 'ละอองฝนหนาแน่น',
+    label: 'ละอองฝนหนาแน่น',
+    desc: 'ฝนละอองหนาเม็ดต่อเนื่อง',
     icon: '🌧️',
     type: 'drizzle',
     nightIcon: '🌧️',
@@ -85,7 +85,7 @@ export const WMO_WEATHER_MAP = {
   },
   61: {
     label: 'ฝนตกเล็กน้อย',
-    desc: 'มีฝนตกเบาๆ โปรยปราย',
+    desc: 'มีฝนตกเบาๆ เป็นหย่อมๆ',
     icon: '🌦️',
     type: 'rain-light',
     nightIcon: '🌧️',
@@ -111,8 +111,8 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: -100
   },
   80: {
-    label: 'ฝนซู่กระจายเล็กน้อย',
-    desc: 'มีฝนโปรยเป็นพักๆ สลับหยุด',
+    label: 'ฝนซู่กระจายบางพื้นที่',
+    desc: 'มีเมฆฝนก่อตัว ฝนตกซู่เป็นพักๆ',
     icon: '🌦️',
     type: 'shower-light',
     nightIcon: '🌧️',
@@ -121,7 +121,7 @@ export const WMO_WEATHER_MAP = {
   },
   81: {
     label: 'ฝนซู่ปานกลาง',
-    desc: 'มีฝนไล่ช้างเป็นระยะ',
+    desc: 'ฝนไล่ช้างตกซู่สลับหยุด',
     icon: '🌧️',
     type: 'shower',
     nightIcon: '🌧️',
@@ -147,8 +147,8 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: -100
   },
   96: {
-    label: 'พายุฝนฟ้าคะนอง + ลูกเห็บเล็กน้อย',
-    desc: 'พายุรุนแรง ลมกระโชกแรง',
+    label: 'พายุฝนฟ้าคะนองลมกระโชกแรง',
+    desc: 'พายุรุนแรง ลมกระโชกแรงจัด',
     icon: '⛈️',
     type: 'thunderstorm',
     nightIcon: '⛈️',
@@ -156,7 +156,7 @@ export const WMO_WEATHER_MAP = {
     laundryRatingBonus: -100
   },
   99: {
-    label: 'พายุฝนฟ้าคะนองรุนแรง',
+    label: 'พายุฝนฟ้าคะนองรุนแรงมาก',
     desc: 'พายุฝนตกหนักและลมกระโชกแรงจัด',
     icon: '⛈️',
     type: 'thunderstorm',

@@ -17,9 +17,9 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
 
   const current = weatherData.current;
   const hourly = weatherData.hourly;
-  const currentHourIndex = findCurrentHourIndex(hourly.time);
+  const currentHourIndex = findCurrentHourIndex(hourly.time, current.time);
   
-  // Extract next 3 to 8 hours forecast window
+  // Extract next 6 hours forecast window starting from CURRENT hour
   const windowHours = 6;
   const forecastWindow = [];
   
@@ -34,45 +34,54 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
         humidity: hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : 60,
         temp: hourly.temperature_2m ? hourly.temperature_2m[idx] : 30,
         wind: hourly.wind_speed_10m ? hourly.wind_speed_10m[idx] : 10,
-        code: hourly.weather_code ? hourly.weather_code[idx] : 0
+        code: hourly.weather_code ? hourly.weather_code[idx] : 0,
+        cloudCover: hourly.cloud_cover ? hourly.cloud_cover[idx] : 50
       });
     }
   }
 
-  // 1. Rain Risk Factor (0 - 100 penalty)
+  // 1. Rain Risk Factor Analysis
   const maxPop = Math.max(...forecastWindow.map(h => h.pop || 0), 0);
   const totalExpectedRain = forecastWindow.reduce((acc, h) => acc + (h.rain || 0), 0);
-  const isCurrentlyRaining = (current.precipitation || 0) > 0 || [51,53,55,61,63,65,80,81,82,95,96,99].includes(current.weather_code);
+  
+  // Distinguish between active heavy rain vs light drizzle / gathering rain clouds
+  const currentPrecip = current.precipitation || 0;
+  const isHeavyRainNow = currentPrecip >= 1.0 || [63, 65, 81, 82, 95, 96, 99].includes(current.weather_code);
+  const isLightPrecipOrClouds = currentPrecip > 0 && currentPrecip < 1.0 || [51, 53, 55, 61, 80].includes(current.weather_code);
 
   let score = 100;
   const warnings = [];
   const highlights = [];
 
-  if (isCurrentlyRaining) {
+  if (isHeavyRainNow) {
     score = 5;
-    warnings.push('ขณะนี้มีฝนตกในพื้นที่');
+    warnings.push('มีฝนตกหนักหรือพายุในพื้นที่ขณะนี้');
   } else {
     // Rain probability penalty
     if (maxPop >= 70) {
-      score -= 75;
-      warnings.push(`โอกาสฝนตกสูงมากถึง ${maxPop}% ใน 6 ชม. ข้างหน้า`);
+      score -= 55;
+      warnings.push(`มีโอกาสฝนตกสูง ${maxPop}% ในช่วง 6 ชม. ข้างหน้า`);
     } else if (maxPop >= 50) {
-      score -= 50;
-      warnings.push(`โอกาสฝนตกปานกลาง-สูง (${maxPop}%) เสี่ยงฝนตก`);
+      score -= 35;
+      warnings.push(`โอกาสฝนตก ${maxPop}% มีความเสี่ยงฝนโปรย`);
     } else if (maxPop >= 30) {
-      score -= 25;
-      warnings.push(`มีโอกาสเกิดฝน ${maxPop}% ควรเฝ้าระวัง`);
+      score -= 20;
+      warnings.push(`โอกาสฝน ${maxPop}% ควรเฝ้าระวังช่วงเย็น`);
     } else if (maxPop <= 15) {
       highlights.push(`โอกาสฝนตกต่ำมากเพียง ${maxPop}%`);
     }
 
     if (totalExpectedRain > 2.0) {
-      score -= 30;
-      warnings.push('คาดว่าจะมีปริมาณน้ำฝนสะสม');
+      score -= 25;
+      warnings.push(`คาดว่าจะมีปริมาณฝนสะสม ${totalExpectedRain.toFixed(1)} มม.`);
+    }
+
+    if (isLightPrecipOrClouds) {
+      warnings.push('กลุ่มเมฆฝนกำลังเคลื่อนผ่าน / ฟ้าครึ้ม');
     }
   }
 
-  // 2. Solar & UV Factor (High UV and high daytime temp dry clothes fast)
+  // 2. Solar & UV Factor (High UV and daytime temp dry clothes fast)
   const currentUV = current.uv_index !== undefined ? current.uv_index : 5;
   const isDay = current.is_day === 1;
 
@@ -85,31 +94,31 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
       highlights.push(`แดดแรงจัด (UV ${currentUV.toFixed(1)}) ฆ่าเชื้อและแห้งไว`);
     } else if (currentUV >= 5) {
       score += 10;
-      highlights.push(`แดดดี (UV ${currentUV.toFixed(1)}) เหมาะตากผ้า`);
+      highlights.push(`แดดดี (UV ${currentUV.toFixed(1)})`);
     } else if (currentUV < 3) {
       score -= 15;
-      warnings.push('แสงแดดอ่อน/มีเมฆบัง ทำให้ผ้าแห้งช้า');
+      warnings.push('แสงแดดน้อย / เมฆบังแดด');
     }
   }
 
   // 3. Humidity Factor
   const humidity = current.relative_humidity_2m || 65;
   if (humidity >= 85) {
-    score -= 25;
+    score -= 20;
     warnings.push(`ความชื้นสูงมาก (${humidity}%) เสี่ยงผ้ามีกลิ่นอับ`);
   } else if (humidity >= 75) {
-    score -= 12;
+    score -= 10;
     warnings.push(`ความชื้นค่อนข้างสูง (${humidity}%)`);
   } else if (humidity <= 55) {
     score += 10;
-    highlights.push(`อากาศแห้งสบาย ความชื้นต่ำ (${humidity}%) ระบายน้ำได้ดี`);
+    highlights.push(`อากาศแห้งสบาย ความชื้นต่ำ (${humidity}%)`);
   }
 
   // 4. Wind Factor
   const windSpeed = current.wind_speed_10m || 10;
   if (windSpeed >= 18) {
     score += 10;
-    highlights.push(`ลมพัดดี (${windSpeed.toFixed(1)} กม./ชม.) ช่วยพัดผ้าแห้งเร็วขึ้น`);
+    highlights.push(`ลมพัดดี (${windSpeed.toFixed(1)} กม./ชม.) พัดผ้าแห้งเร็ว`);
   } else if (windSpeed < 5) {
     score -= 5;
     warnings.push('ลมนิ่ง อากาศถ่ายเทช้า');
@@ -121,9 +130,9 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
     pm25 = airQualityData.current.pm2_5;
     if (pm25 >= 50) {
       score -= 15;
-      warnings.push(`ค่าฝุ่น PM2.5 สูง (${pm25.toFixed(1)} µg/m³) เสี่ยงฝุ่นเกาะผ้า`);
+      warnings.push(`ค่าฝุ่น PM2.5 สูง (${pm25.toFixed(1)} µg/m³) เสี่ยงฝุ่นเกาะ`);
     } else if (pm25 <= 25) {
-      highlights.push(`อากาศสะอาด PM2.5 ต่ำ (${pm25.toFixed(1)} µg/m³) ปลอดภัย`);
+      highlights.push(`อากาศสะอาด PM2.5 ต่ำ (${pm25.toFixed(1)} µg/m³)`);
     }
   }
 
@@ -139,28 +148,32 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
     badgeClass = 'status-excellent';
     icon = '☀️🧺';
     title = 'สภาพอากาศยอดเยี่ยมสำหรับการตากผ้ากลางแจ้ง!';
-    advice = 'แดดจัด ลมพัดดี โอกาสฝนต่ำมาก ผ้าจะแห้งสนิท ไร้กลิ่นอับแน่นอน รีบซักและตากได้เลย';
+    advice = 'แดดจัด ลมพัดดี โอกาสฝนต่ำมาก ผ้าจะแห้งสนิท ไร้กลิ่นอับแน่นอน ซักตากกลางแจ้งได้เต็มที่';
   } else if (score >= 60) {
     statusKey = 'GOOD';
-    badgeText = 'ซักตากได้ 👍 แดดดีพอสมควร';
+    badgeText = 'ซักตากได้ 👍 แดดปานกลาง';
     badgeClass = 'status-good';
     icon = '🌤️👕';
     title = 'ซักและตากกลางแจ้งได้ตามปกติ';
-    advice = 'สภาพอากาศอยู่ในเกณฑ์ดี แดดส่องสม่ำเสมอ แนะนำให้ตากในช่วงที่แดดส่องตรงเพื่อประสิทธิภาพสูงสุด';
-  } else if (score >= 40) {
+    advice = 'สภาพอากาศอยู่ในเกณฑ์ดี แดดส่องสม่ำเสมอ แนะนำให้ตากในช่วงแดดออกเพื่อประสิทธิภาพสูงสุด';
+  } else if (score >= 35) {
     statusKey = 'CAUTION';
-    badgeText = 'เฝ้าระวัง ⚠️ อาจแห้งช้า/เสี่ยงฝน';
+    badgeText = 'เฝ้าระวัง ⚠️ เสี่ยงฝนช่วงบ่าย-เย็น';
     badgeClass = 'status-caution';
     icon = '⛅👗';
-    title = 'ควรตากในที่ร่มที่มีอากาศถ่ายเท หรือคอยดูฟ้าฝน';
-    advice = 'มีความชื้นหรือเมฆบดบังแดด และมีโอกาสเกิดฝนเล็กน้อย แนะนำให้ตากในระเบียงที่มีหลังคา หรือตากในที่ร่มเปิดพัดลมช่วย';
+    title = 'ตากได้ชั่วคราว แต่ควรมีคนคอยดูฟ้าฝนหรือตากใต้ชายคา';
+    advice = maxPop >= 50 
+      ? `ขณะนี้รอบพื้นที่อาจยังไม่ตก แต่แบบจำลองตรวจพบโอกาสฝนตกสูงถึง ${maxPop}% ในอีก 2-4 ชม. ข้างหน้า แนะนำตากในระเบียงมีหลังคาหรือพร้อมเก็บ`
+      : 'มีเมฆบังแดดหรือความชื้นสูง ผ้าอาจแห้งช้ากว่าปกติ แนะนำให้ตากในที่ลมโกรก';
   } else {
     statusKey = 'POOR';
-    badgeText = 'งดตากกลางแจ้ง 🌧️ เสี่ยงฝน/ความชื้นสูง';
+    badgeText = 'ไม่แนะนำกลางแจ้ง 🌧️ เสี่ยงฝนสูง';
     badgeClass = 'status-poor';
     icon = '🌧️🚫';
-    title = 'งดตากผ้ากลางแจ้งเด็ดขาด!';
-    advice = 'มีความเสี่ยงฝนตกสูงมากหรือกำลังมีฝนตก ความชื้นสูงทำให้ผ้าไม่แห้งและสะสมกลิ่นอับ แนะนำให้ใช้เครื่องอบผ้าหรือตากในอาคาร';
+    title = 'เสี่ยงฝนตกสูง หรือความชื้นสูงมาก!';
+    advice = maxPop >= 60
+      ? `แม้ตอนนี้อาจยังไม่ตกในจุดที่คุณอยู่ แต่มีกลุ่มเมฆฝนหนาแน่นครอบคลุมพื้นที่สุขสวัสดิ์-พระราม 3 เสี่ยงฝนเทกะทันหัน แนะนำตากในร่มหรืออบผ้า`
+      : 'ความชื้นสูงและไม่มีแสงแดด ทำให้ผ้าแห้งยากและเกิดกลิ่นอับ แนะนำให้ใช้เครื่องอบผ้าหรือตากในอาคาร';
   }
 
   // Estimated Drying Time Calculation
@@ -196,17 +209,18 @@ export function calculateLaundryAdvisor(weatherData, airQualityData = null, fabr
   };
 }
 
-function findCurrentHourIndex(times) {
+function findCurrentHourIndex(times, currentIsoTime = null) {
   if (!times || !times.length) return 0;
+  
+  if (currentIsoTime) {
+    const idx = times.indexOf(currentIsoTime);
+    if (idx !== -1) return idx;
+  }
+
   const now = new Date();
-  const currentIsoHour = now.toISOString().slice(0, 13); // "2026-08-26T08" in UTC or local
-  
-  // Find closest matching local time string
-  const currentLocalHour = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}`;
-  
-  let closestIdx = 0;
+  const currentIsoHour = now.toISOString().slice(0, 13);
   for (let i = 0; i < times.length; i++) {
-    if (times[i].startsWith(currentLocalHour)) {
+    if (times[i].startsWith(currentIsoHour)) {
       return i;
     }
   }
@@ -216,26 +230,22 @@ function findCurrentHourIndex(times) {
 function calculateDryingTime(current, forecastWindow, fabric) {
   let baseHours = fabric.baseHours;
   
-  // Temperature effect (Standard 30°C base)
   const temp = current.temperature_2m || 30;
   if (temp > 35) baseHours *= 0.8;
   else if (temp > 32) baseHours *= 0.9;
   else if (temp < 25) baseHours *= 1.3;
 
-  // Humidity effect (Standard 60% base)
   const humidity = current.relative_humidity_2m || 65;
   if (humidity < 50) baseHours *= 0.8;
   else if (humidity > 80) baseHours *= 1.4;
   else if (humidity > 70) baseHours *= 1.2;
 
-  // UV / Sun effect
   const uv = current.uv_index || 5;
   const isDay = current.is_day === 1;
   if (!isDay) baseHours *= 1.8;
   else if (uv > 7) baseHours *= 0.8;
   else if (uv < 3) baseHours *= 1.25;
 
-  // Wind effect
   const wind = current.wind_speed_10m || 10;
   if (wind > 15) baseHours *= 0.85;
   else if (wind < 5) baseHours *= 1.15;
@@ -264,7 +274,6 @@ function findBestDryingWindow(hourly, startIndex) {
   
   let bestStart = null;
   let bestEnd = null;
-  let maxScore = -1;
 
   const count = Math.min(24, hourly.time.length - startIndex);
   
@@ -275,10 +284,8 @@ function findBestDryingWindow(hourly, startIndex) {
     const hourTime = new Date(hourly.time[idx]);
     const hourNum = hourTime.getHours();
 
-    // Prefer daytime 07:00 to 17:00
     if (hourNum >= 7 && hourNum <= 17) {
-      const hourScore = (uv * 10) - (pop * 1.2);
-      if (pop <= 25 && uv >= 3) {
+      if (pop <= 30 && uv >= 3) {
         if (bestStart === null) bestStart = hourNum;
         bestEnd = hourNum + 1;
       }
@@ -305,7 +312,7 @@ function generateHourlySafetyTimeline(hourly, startIndex, hoursCount = 12) {
     const temp = hourly.temperature_2m ? hourly.temperature_2m[idx] : 30;
     const rain = hourly.precipitation ? hourly.precipitation[idx] : 0;
 
-    let status = 'safe'; // safe, caution, danger
+    let status = 'safe';
     let statusText = 'ปลอดภัย';
     
     if (pop >= 60 || rain > 0.5) {
@@ -316,7 +323,7 @@ function generateHourlySafetyTimeline(hourly, startIndex, hoursCount = 12) {
       statusText = 'ระวังฝน';
     } else if (uv >= 5) {
       status = 'safe';
-      statusText = 'แดดดีมาก';
+      statusText = 'แดดดี';
     } else {
       status = 'safe';
       statusText = 'ตากได้';

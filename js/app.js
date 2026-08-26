@@ -47,6 +47,9 @@ class WeatherApp {
       thaiTime: document.getElementById('current-thai-time'),
       btnRefresh: document.getElementById('btn-refresh'),
       btnGps: document.getElementById('btn-gps'),
+      btnRadar: document.getElementById('btn-radar'),
+      radarModal: document.getElementById('radar-modal'),
+      btnCloseRadar: document.getElementById('btn-close-radar'),
       
       // Location
       locationName: document.getElementById('current-location-name'),
@@ -78,6 +81,7 @@ class WeatherApp {
       weatherDetailedDesc: document.getElementById('weather-detailed-desc'),
       realFeelPill: document.getElementById('real-feel-pill'),
       tempMaxMinPill: document.getElementById('temp-max-min-pill'),
+      cloudCoverPill: document.getElementById('cloud-cover-pill'),
 
       // Metrics Cards
       metricRainPop: document.getElementById('metric-rain-pop'),
@@ -115,6 +119,23 @@ class WeatherApp {
 
     // GPS Geolocation button
     this.el.btnGps.addEventListener('click', () => this.handleGeolocation());
+
+    // Radar modal open / close
+    if (this.el.btnRadar && this.el.radarModal) {
+      this.el.btnRadar.addEventListener('click', () => {
+        this.el.radarModal.classList.add('show');
+      });
+    }
+    if (this.el.btnCloseRadar && this.el.radarModal) {
+      this.el.btnCloseRadar.addEventListener('click', () => {
+        this.el.radarModal.classList.remove('show');
+      });
+      this.el.radarModal.addEventListener('click', (e) => {
+        if (e.target === this.el.radarModal) {
+          this.el.radarModal.classList.remove('show');
+        }
+      });
+    }
 
     // Fabric Type Buttons
     this.el.fabricButtonsGroup.addEventListener('click', (e) => {
@@ -272,10 +293,19 @@ class WeatherApp {
       this.el.tempMaxMinPill.textContent = `🔺 สูงสุด ${maxT}° | 🔻 ต่ำสุด ${minT}°`;
     }
 
+    if (this.el.cloudCoverPill && cur.cloud_cover !== undefined) {
+      this.el.cloudCoverPill.textContent = `☁️ เมฆปกคลุม: ${cur.cloud_cover}%`;
+    }
+
     // 1. Rain Chance & Precipitation
     let rainPop = 0;
+    const curIdx = this.weatherData.current && this.weatherData.current.time 
+      ? this.weatherData.hourly.time.indexOf(this.weatherData.current.time) 
+      : 0;
+    const safeIdx = curIdx >= 0 ? curIdx : 0;
+
     if (this.weatherData.hourly && this.weatherData.hourly.precipitation_probability) {
-      rainPop = this.weatherData.hourly.precipitation_probability[0] || 0;
+      rainPop = this.weatherData.hourly.precipitation_probability[safeIdx] || 0;
     } else if (daily && daily.precipitation_probability_max) {
       rainPop = daily.precipitation_probability_max[0] || 0;
     }
@@ -310,7 +340,7 @@ class WeatherApp {
       this.el.metricUvDesc.textContent = '⛅ แดดอ่อน แนะนำตากแดดตรง';
       this.el.metricUvDesc.className = 'metric-subtext';
     } else {
-      this.el.metricUvDesc.textContent = '☁️ แดดน้อยมาก/กลางคืน';
+      this.el.metricUvDesc.textContent = '☁️ แดดน้อย / มีเมฆบัง';
       this.el.metricUvDesc.className = 'metric-subtext';
     }
 
@@ -359,7 +389,7 @@ class WeatherApp {
 
     // Score Dial Color
     let dialColor = '#10b981';
-    if (analysis.score < 40) dialColor = '#ef4444';
+    if (analysis.score < 35) dialColor = '#ef4444';
     else if (analysis.score < 60) dialColor = '#f59e0b';
     else if (analysis.score < 80) dialColor = '#06b6d4';
     this.el.scoreDialBar.style.stroke = dialColor;
@@ -414,19 +444,23 @@ class WeatherApp {
     const hourly = this.weatherData.hourly;
     this.el.hourlyForecastContainer.innerHTML = '';
 
-    const now = new Date();
-    const currentHour = now.getHours();
+    // Locate current hour index in the API array
+    const currentIdx = this.weatherData.current && this.weatherData.current.time 
+      ? hourly.time.indexOf(this.weatherData.current.time) 
+      : 0;
+    const startIdx = currentIdx >= 0 ? currentIdx : 0;
 
-    // Show next 24 hours
-    for (let i = 0; i < Math.min(24, hourly.time.length); i++) {
-      const date = new Date(hourly.time[i]);
+    // Show next 24 hours starting from the CURRENT hour
+    for (let i = 0; i < Math.min(24, hourly.time.length - startIdx); i++) {
+      const idx = startIdx + i;
+      const date = new Date(hourly.time[idx]);
       const hourNum = date.getHours();
       const isNow = i === 0;
       const timeLabel = isNow ? 'ขณะนี้' : `${String(hourNum).padStart(2, '0')}:00`;
-      const temp = Math.round(hourly.temperature_2m[i]);
-      const isDay = hourly.is_day ? hourly.is_day[i] : 1;
-      const weatherInfo = getWeatherInfo(hourly.weather_code[i], isDay);
-      const pop = hourly.precipitation_probability ? hourly.precipitation_probability[i] : 0;
+      const temp = Math.round(hourly.temperature_2m[idx]);
+      const isDay = hourly.is_day ? hourly.is_day[idx] : 1;
+      const weatherInfo = getWeatherInfo(hourly.weather_code[idx], isDay);
+      const pop = hourly.precipitation_probability ? hourly.precipitation_probability[idx] : 0;
 
       let popClass = 'rain-low';
       if (pop >= 60) popClass = 'rain-high';
@@ -440,7 +474,7 @@ class WeatherApp {
         <span class="hourly-temp">${temp}°</span>
         <span class="hourly-rain-badge ${popClass}">🌧️ ${pop}%</span>
       `;
-      card.title = `${timeLabel} - ${weatherInfo.label} (ฝน ${pop}%, ความชื้น ${hourly.relative_humidity_2m ? hourly.relative_humidity_2m[i] : '--'}%)`;
+      card.title = `${timeLabel} - ${weatherInfo.label} (ฝน ${pop}%, ความชื้น ${hourly.relative_humidity_2m ? hourly.relative_humidity_2m[idx] : '--'}%)`;
       this.el.hourlyForecastContainer.appendChild(card);
     }
   }
@@ -467,7 +501,6 @@ class WeatherApp {
       const minTemp = Math.round(daily.temperature_2m_min[i]);
       const maxTemp = Math.round(daily.temperature_2m_max[i]);
 
-      // Laundry rating for the day
       let laundryBadgeHtml = '';
       if (pop <= 20) {
         laundryBadgeHtml = '<span class="daily-laundry-badge status-excellent">☀️ ตากได้ดีเยี่ยม</span>';
@@ -479,7 +512,6 @@ class WeatherApp {
         laundryBadgeHtml = '<span class="daily-laundry-badge status-poor">🌧️ เสี่ยงฝนสูงมาก</span>';
       }
 
-      // Bar fill percentages
       const leftPercent = Math.max(0, ((minTemp - minAll) / tempSpan) * 100);
       const widthPercent = Math.max(10, ((maxTemp - minTemp) / tempSpan) * 100);
 
