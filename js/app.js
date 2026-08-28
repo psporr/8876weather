@@ -93,13 +93,27 @@ class WeatherApp {
       ];
       const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
       
-      const dayName = thaiDays[now.getDay()];
-      const day = now.getDate();
-      const month = thaiMonths[now.getMonth()];
-      
-      // Exact Thai 2-digit local time
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
+      // บังคับใช้เวลาประเทศไทย (Asia/Bangkok / GMT+7) เสมอ ไม่ว่าจะเปิดจากที่ไหนหรือโดน Screenshot Bot แคป
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Bangkok',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(now);
+      const getVal = (type) => parts.find(p => p.type === type)?.value;
+
+      const bkkDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+      const dayName = thaiDays[bkkDate.getDay()];
+      const day = getVal('day');
+      const month = thaiMonths[parseInt(getVal('month'), 10) - 1];
+      const hours = getVal('hour') || '00';
+      const minutes = getVal('minute') || '00';
       const timeStr = `${hours}:${minutes} น.`;
 
       this.el.thaiTime.textContent = `${dayName}ที่ ${day} ${month} • ${timeStr}`;
